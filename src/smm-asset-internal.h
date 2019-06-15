@@ -48,6 +48,13 @@ struct smm_asset_s {
 	float last_command_lon;
 };
 
+struct smm_search_s {
+    smm_asset asset;
+    char *url;
+    uint64_t distance;
+    uint64_t length;
+};
+
 struct smm_curl_res_s {
 	bool success;
 	long httpcode;

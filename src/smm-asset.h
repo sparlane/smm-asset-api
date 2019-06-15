@@ -41,6 +41,23 @@ typedef struct smm_asset_s *smm_asset;
  */
 typedef struct smm_asset_s **smm_assets;
 
+/**
+ * An opaque objec that represents a search on the smm
+ */
+typedef struct smm_search_s *smm_search;
+
+/**
+ * A waypoint
+ */
+typedef struct smm_waypoint_s {
+    double lat;
+    double lon;
+} *smm_waypoint;
+
+/**
+ * A list of waypoints
+ */
+typedef struct smm_waypoint_s **smm_waypoints;
 
 /**
  * Possible current states for an smm_connection object
@@ -167,3 +184,81 @@ smm_asset_command smm_asset_last_command(smm_asset asset);
  */
 bool smm_asset_last_goto_pos(smm_asset asset, double *lat, double *lon);
 
+/**
+ * Get a search to perform from the SMM
+ *
+ * @param asset The Asset to conduct the search
+ * @param latitude the current latitude of the asset in degrees
+ * @param longitude the current longitude of the asset in degrees
+ *
+ * @return the closest search for this asset type, it will need to be accepted with @ref smm_search_accept before searching begins
+ */
+smm_search smm_asset_get_search(smm_asset asset, double latitude, double longitude);
+
+/**
+ * Get the distance to the start of the search
+ * This value was correct at the point it was requested
+ *
+ * @param search the search
+ *
+ * @return the distance in meters to the start of the search, 0 on error
+ */
+uint64_t smm_search_distance(smm_search search);
+
+/**
+ * Get the total length of the search
+ *
+ * @param search the search
+ *
+ * @return the total length of the search in meters, 0 on error
+ */
+uint64_t smm_search_length(smm_search search);
+
+/**
+ * Get all the waypoints associated with a a search
+ *
+ * @param search the search
+ * @param waypoints a place to store the list of waypoints
+ * @param waypoints_count a place to store the count of waypoints
+ *
+ * @return true if waypoints for the search were stored in waypoints
+ */
+bool smm_search_get_waypoints(smm_search search, smm_waypoints *waypoints, size_t *waypoints_count);
+
+/**
+ * Accept a search
+ * This is an agreement with the server to conduct this search
+ * all subsequent attempts to get a search will only return this search
+ *
+ * @param search the search to accept
+ *
+ * @return true if the server accepted this search begining, otherwise @ref smm_search_destory the search and @ref smm_asset_get_search again
+ */
+bool smm_search_accept(smm_search search);
+
+/**
+ * Mark a search as completed
+ * Once the current search has been completed, call this function to notify the server
+ * this will mark the search as completed and allow the asset to select another search.
+ *
+ * @param search the search that has been completed
+ *
+ * @return true if the server accepted the search as completed, false in other cases
+ */
+bool smm_search_complete(smm_search search);
+
+/**
+ * Destroy a search object
+ *
+ * @param search the search object to free
+ */
+void smm_search_destroy(smm_search search);
+
+/**
+ * Free a list of waypoints
+ * i.e. from @ref smm_search_get_waypoints
+ *
+ * @param waypoints the set of waypoints to free
+ * @param waypoints_count the number of waypoints
+ */
+void smm_waypoints_free (smm_waypoints waypoints, size_t waypoints_count);
