@@ -39,6 +39,8 @@ smm_asset_connect (const char *host, const char *user, const char *pass)
 	conn->user = strdup (user);
 	conn->pass = strdup (pass);
 
+	smm_connection_login (conn);
+
 	return conn;
 }
 
@@ -60,6 +62,8 @@ smm_connection_close (smm_connection connection)
 		free (connection->host);
 		free (connection->user);
 		free (connection->pass);
+		free (connection->csrfmiddlewaretoken);
+		curl_easy_cleanup (connection->curl);
 	}
 	free (connection);
 }

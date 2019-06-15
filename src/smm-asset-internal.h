@@ -24,9 +24,26 @@
 
 #include "smm-asset.h"
 
+#include <stdbool.h>
+
+#include <curl/curl.h>
+
 struct smm_connection_s {
 	char *host;
 	char *user;
 	char *pass;
 	smm_connection_status state;
+	CURL *curl;
+	char *csrfmiddlewaretoken;
 };
+
+struct smm_curl_res_s {
+	bool success;
+	long httpcode;
+	char *full_uri;
+	char *redirect_url;
+};
+
+void smm_curl_res_free (struct smm_curl_res_s *);
+struct smm_curl_res_s *smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const char *post_data, size_t (*write_func)(char *ptr, size_t size, size_t nmemb, void *userdata), void *write_data);
+bool smm_connection_login (smm_connection connection);
