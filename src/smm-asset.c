@@ -203,3 +203,171 @@ smm_asset_free_assets (smm_assets assets, size_t assets_count)
 	}
 	free (assets);
 }
+
+static int
+smm_asset_get_asset_id (smm_asset asset)
+{
+	return asset->asset_id;
+}
+
+const char *
+smm_asset_name (smm_asset asset)
+{
+	if (asset)
+	{
+		return asset->name;
+	}
+	return NULL;
+}
+
+const char *
+smm_asset_type (smm_asset asset)
+{
+	if (asset)
+	{
+		return asset->type;
+	}
+	return NULL;
+}
+
+static bool
+smm_asset_update_command (smm_asset asset, struct buffer_s *buf)
+{
+	json_t *json_root;
+	json_error_t json_error;
+
+	json_root = json_loadb (buf->data, buf->bytes, 0, &json_error);
+	if (json_root)
+	{
+		const char *command = NULL;
+		json_t *tmp;
+
+		tmp = json_object_get (json_root, "action");
+		if (tmp)
+		{
+			command = json_string_value (tmp);
+		}
+
+		if (strcmp (command, "GOTO") == 0)
+		{
+			/* Get lat and long as well */
+			tmp = json_object_get (json_root, "latitude");
+			if (tmp)
+			{
+				asset->last_command_lat = json_real_value (tmp);
+			}
+			tmp = json_object_get (json_root, "longitude");
+			if (tmp)
+			{
+				asset->last_command_lon = json_real_value (tmp);
+			}
+			asset->last_command = SMM_COMMAND_GOTO;
+		}
+		else if (strcmp (command, "RON") == 0)
+		{
+			asset->last_command = SMM_COMMAND_CONTINUE;
+		}
+		else if (strcmp (command, "RTL") == 0)
+		{
+			asset->last_command = SMM_COMMAND_RTL;
+		}
+		else if (strcmp (command, "CIR") == 0)
+		{
+			asset->last_command = SMM_COMMAND_CIRCLE;
+		}
+		else
+		{
+			asset->last_command = SMM_COMMAND_UNKNOWN;
+		}
+
+
+		json_decref (json_root);
+	}
+	else
+	{
+		printf ("Error on line %i: %s\n", json_error.line, json_error.text);
+		asset->last_command = SMM_COMMAND_UNKNOWN;
+	}
+
+	return true;
+}
+
+
+smm_asset_command
+smm_asset_last_command (smm_asset asset)
+{
+	return asset->last_command;
+}
+
+bool
+smm_asset_last_goto_pos (smm_asset asset, double *lat, double *lon)
+{
+	if (asset->last_command != SMM_COMMAND_GOTO)
+	{
+		return false;
+	}
+	if (lat == NULL || lon == NULL)
+	{
+		return false;
+	}
+	*lat = asset->last_command_lat;
+	*lon = asset->last_command_lon;
+	return true;
+}
+
+
+bool
+smm_asset_report_position (smm_asset asset, double latitude, double longitude, unsigned int altitude, uint16_t bearing, uint8_t fix)
+{
+	struct buffer_s buf = { NULL, 0 };
+
+	char *page = NULL;
+	if (asprintf (&page, "/data/assets/%s/position/add/?lat=%lf&lon=%lf&alt=%u&bearing=%u&fix=%u", asset->name, latitude, longitude, altitude, bearing, fix)
+	    < 0)
+	{
+		return false;
+	}
+
+	struct smm_curl_res_s *res = smm_connection_curl_retrieve_url (asset->conn, page, NULL, to_buffer, &buf);
+	if (res == NULL)
+	{
+		free (page);
+		return false;
+	}
+	if (!(res->success && res->httpcode == 200))
+	{
+		/* login and try again */
+		smm_curl_res_free (res);
+		smm_connection_login (asset->conn);
+		res = smm_connection_curl_retrieve_url (asset->conn, page, NULL, to_buffer, &buf);
+		if (!res || !(res->success && res->httpcode == 200))
+		{
+			smm_curl_res_free (res);
+			free (page);
+			return false;
+		}
+	}
+
+	free (page);
+
+	/* if json data was returned, update the current action */
+	if (res->content_type != NULL && strcmp (res->content_type, "application/json") == 0)
+	{
+		smm_asset_update_command (asset, &buf);
+	}
+	else
+	{
+		if (buf.data && strncmp (buf.data, "Continue", buf.bytes) == 0)
+		{
+			asset->last_command = SMM_COMMAND_CONTINUE;
+		}
+		else
+		{
+			asset->last_command = SMM_COMMAND_NONE;
+		}
+	}
+
+	free (buf.data);
+
+	return false;
+}

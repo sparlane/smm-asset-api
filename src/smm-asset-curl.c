@@ -35,6 +35,7 @@ smm_curl_res_free (struct smm_curl_res_s *res)
 	{
 		free (res->full_uri);
 		free (res->redirect_url);
+		free (res->content_type);
 	}
 }
 
@@ -126,6 +127,15 @@ smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const c
 	curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &res->httpcode);
 	switch (res->httpcode)
 	{
+		case 200:
+		{
+			char *ct = NULL;
+			if (curl_easy_getinfo (curl, CURLINFO_CONTENT_TYPE, &ct) == CURLE_OK)
+			{
+				res->content_type = strdup (ct);
+			}
+		}
+			break;
 		case 301:
 		case 302:
 		case 303:

@@ -24,6 +24,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /**
  * An opaque object for accessing the smm
@@ -52,6 +53,18 @@ typedef enum {
 	SMM_CONNECTION_AUTHENTICATION_FAILURE, /*!< Unable to authenticate with host */
 	SMM_CONNECTION_FAILURE, /*!< Unable to communicate, for another reason */
 } smm_connection_status;
+
+/**
+ * Possible commands for an asset
+ */
+typedef enum {
+    SMM_COMMAND_NONE, /*!< No restriction on current operation */
+    SMM_COMMAND_CIRCLE, /*!< Circle/Hold at current position */
+    SMM_COMMAND_RTL, /*!< Return to launch site */
+    SMM_COMMAND_GOTO, /*!< Goto to the specified position */
+    SMM_COMMAND_CONTINUE, /*!< Previous command revoked, resume own navigation */
+    SMM_COMMAND_UNKNOWN, /*!< The command from the server is not known */
+} smm_asset_command;
 
 /**
  * Connect to the specified smm
@@ -99,3 +112,58 @@ bool smm_asset_get_assets(smm_connection connection, smm_assets *assets, size_t 
  * @param assets_count how many assets to free
  */
 void smm_asset_free_assets(smm_assets assets, size_t assets_count);
+
+/**
+ * Get the name of the specified asset
+ *
+ * @param asset the Asset
+ *
+ * @return The name of the asset, or NULL if asset is invalid
+ */
+const char *smm_asset_name(smm_asset asset);
+
+/**
+ * Get the type of the specified asset
+ *
+ * @param asset the Asset
+ *
+ * @return The type of the asset, or NULL if asset is invalid
+ */
+const char *smm_asset_type(smm_asset asset);
+
+/**
+ * Report the current position of the asset to the server
+ *
+ * @param asset the Asset
+ * @param latitude The current latitude in degrees
+ * @param longitude The current longitude in degrees
+ * @param altitude The current altitude in meters
+ * @param bearing the current course over ground in degrees true
+ * @param fix the accurancy of the current fix (0=unknown, 2=2d only, 3 = 3d fix)
+ *
+ * @return true if the position was reported to the server
+ */
+bool smm_asset_report_position(smm_asset asset, double latitude, double longitude, unsigned int altitude, uint16_t bearing, uint8_t fix);
+
+/**
+ * Get the last command we saw from the server
+ * the command is set in response to a position report,
+ * normally this is checked after @ref smm_asset_report_position
+ *
+ * @param asset the Asset
+ *
+ * @return The command that currently applies to the asset
+ */
+smm_asset_command smm_asset_last_command(smm_asset asset);
+
+/**
+ * The position associated with a goto command
+ *
+ * @param asset the Asset
+ * @param lat A place to store the latitude
+ * @param lon A place to store the longitude
+ *
+ * @return true if the current command is goto and the fields were set
+ */
+bool smm_asset_last_goto_pos(smm_asset asset, double *lat, double *lon);
+

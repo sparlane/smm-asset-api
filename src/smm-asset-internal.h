@@ -43,6 +43,9 @@ struct smm_asset_s {
 	char *type;
 	int asset_id;
 	int asset_type_id;
+	smm_asset_command last_command;
+	float last_command_lat;
+	float last_command_lon;
 };
 
 struct smm_curl_res_s {
@@ -50,6 +53,7 @@ struct smm_curl_res_s {
 	long httpcode;
 	char *full_uri;
 	char *redirect_url;
+	char *content_type;
 };
 
 struct buffer_s {
