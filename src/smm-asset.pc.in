@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @PACKAGE_NAME@
+Description: Library to act as an Asset for Search Management Map
+URL: https://github.com/canterbury-air-patrol/smm-asset
+Version: @VERSION@
+Libs: -lsmmasset
+Cflags:
