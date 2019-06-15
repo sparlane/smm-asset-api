@@ -44,6 +44,24 @@ eat_data (char *ptr __attribute__ ((unused)), size_t size, size_t nmemb, void *u
 	return size * nmemb;
 }
 
+size_t
+to_buffer (char *ptr, size_t size, size_t nmemb, void *userdata)
+{
+	size_t new_bytes = size * nmemb;
+	struct buffer_s *buf = (struct buffer_s *) userdata;
+	char *tmp = realloc (buf->data, buf->bytes + new_bytes + 1);
+	if (tmp == NULL)
+	{
+		return 0;
+	}
+	buf->data = tmp;
+	memcpy (&buf->data[buf->bytes], ptr, new_bytes);
+	buf->bytes += new_bytes;
+	buf->data[buf->bytes] = '\0';
+
+	return new_bytes;
+}
+
 struct smm_curl_res_s *
 smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const char *post_data,
 				  size_t (*write_func) (char *ptr, size_t size, size_t nmemb, void *userdata), void *write_data)

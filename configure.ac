@@ -10,6 +10,7 @@ LT_INIT([disable-static pic-only])
 
 PKG_CHECK_MODULES([TIDY],[tidy])
 PKG_CHECK_MODULES([CURL],[libcurl])
+PKG_CHECK_MODULES([JANSSON],[jansson])
 
 AC_CONFIG_FILES([Makefile
 	src/Makefile

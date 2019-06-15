@@ -22,11 +22,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <stdbool.h>
+#include <stddef.h>
 
 /**
  * An opaque object for accessing the smm
  */
 typedef struct smm_connection_s *smm_connection;
+
+/**
+ * An opaque object that represents an asset on the smm
+ */
+typedef struct smm_asset_s *smm_asset;
+
+/**
+ * A list of opaque objects that represent assets on the smm
+ */
+typedef struct smm_asset_s **smm_assets;
 
 
 /**
@@ -68,3 +80,22 @@ smm_connection_status smm_asset_connection_get_state(smm_connection connection);
  * @param connection the smm_connection object to close and free
  */
 void smm_connection_close (smm_connection connection);
+
+/**
+ * Get all the assets that this user account has access to
+ *
+ * @param connection the smm_connection object to get the assets from
+ * @param assets Where to store the assets
+ * @param assets_count Where to store how many assets there are
+ *
+ * @return true if assets were successfully retrieved (even if there are none), false if there was an error
+ */
+bool smm_asset_get_assets(smm_connection connection, smm_assets *assets, size_t *assets_count);
+
+/**
+ * Free a set of assets
+ *
+ * @param assets the assets to free
+ * @param assets_count how many assets to free
+ */
+void smm_asset_free_assets(smm_assets assets, size_t assets_count);
