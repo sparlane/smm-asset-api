@@ -1,4 +1,4 @@
-AM_CFLAGS =
+AM_CFLAGS = -Werror -Wall -Wformat=2 -Wvla -Wextra -Wwrite-strings -Wmissing-prototypes -Wunreachable-code -pedantic -std=c99 -D_DEFAULT_SOURCE -D_GNU_SOURCE
 
 lib_LTLIBRARIES = libsmmasset.la
 
