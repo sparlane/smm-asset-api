@@ -39,7 +39,8 @@ extern bool smm_debug;
 	} \
 	while (0)
 
-struct smm_connection_s {
+struct smm_connection_s
+{
 	char *host;
 	char *user;
 	char *pass;
@@ -48,7 +49,8 @@ struct smm_connection_s {
 	char *csrfmiddlewaretoken;
 };
 
-struct smm_asset_s {
+struct smm_asset_s
+{
 	smm_connection conn;
 	char *name;
 	char *type;
@@ -59,14 +61,16 @@ struct smm_asset_s {
 	float last_command_lon;
 };
 
-struct smm_search_s {
-    smm_asset asset;
-    char *url;
-    uint64_t distance;
-    uint64_t length;
+struct smm_search_s
+{
+	smm_asset asset;
+	char *url;
+	uint64_t distance;
+	uint64_t length;
 };
 
-struct smm_curl_res_s {
+struct smm_curl_res_s
+{
 	bool success;
 	long httpcode;
 	char *full_uri;
@@ -74,16 +78,18 @@ struct smm_curl_res_s {
 	char *content_type;
 };
 
-struct buffer_s {
-    char *data;
-    size_t bytes;
+struct buffer_s
+{
+	char *data;
+	size_t bytes;
 };
 
-size_t to_buffer(char *ptr, size_t size, size_t nmemb, void *userdata);
+size_t to_buffer (char *ptr, size_t size, size_t nmemb, void *userdata);
 
 void smm_curl_res_free (struct smm_curl_res_s *);
-struct smm_curl_res_s *smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const char *post_data, size_t (*write_func)(char *ptr, size_t size, size_t nmemb, void *userdata), void *write_data);
+struct smm_curl_res_s *smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const char *post_data,
+							 size_t (*write_func) (char *ptr, size_t size, size_t nmemb, void *userdata), void *write_data);
 bool smm_connection_login (smm_connection connection);
 
-smm_asset smm_asset_create(smm_connection connection, const char *name, const char *type, int asset_id, int asset_type_id);
-void smm_asset_free_asset(smm_asset assets);
+smm_asset smm_asset_create (smm_connection connection, const char *name, const char *type, int asset_id, int asset_type_id);
+void smm_asset_free_asset (smm_asset assets);
