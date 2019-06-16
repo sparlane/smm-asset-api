@@ -1,4 +1,4 @@
-AC_INIT([libsmm-asset], [0.1])
+AC_INIT([libsmm-asset], [0.1.0])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_CONFIG_MACRO_DIRS([m4])

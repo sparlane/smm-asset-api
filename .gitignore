@@ -18,3 +18,5 @@ libtool
 ltmain.sh
 missing
 src/smm-asset.pc
+*.tar.gz
+*~

@@ -3,7 +3,7 @@ AM_CFLAGS += $(TIDY_CFLAGS) $(CURL_CFLAGS) $(JANSSON_CFLAGS)
 
 lib_LTLIBRARIES = libsmmasset.la
 
-libsmmasset_la_SOURCES = smm-asset.c smm-asset-curl.c
+libsmmasset_la_SOURCES = smm-asset.c smm-asset-curl.c smm-asset-internal.h
 libsmmasset_la_LIBADD = $(TIDY_LIBS) $(CURL_LIBS) $(JANSSON_LIBS)
 
 include_HEADERS = smm-asset.h
