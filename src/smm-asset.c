@@ -28,6 +28,14 @@
 
 #include <jansson.h>
 
+bool smm_debug = false;
+
+void
+smm_asset_debugging_set (bool debug)
+{
+	smm_debug = debug;
+}
+
 smm_connection
 smm_asset_connect (const char *host, const char *user, const char *pass)
 {

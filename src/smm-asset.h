@@ -84,6 +84,14 @@ typedef enum {
 } smm_asset_command;
 
 /**
+ * Enable/disable the debugging
+ *
+ * @param debug true to enable debugging, false to disable
+ *
+ */
+void smm_asset_debugging_set (bool debug);
+
+/**
  * Connect to the specified smm
  *
  * @param host the URI of the smm server (i.e. https://smm.example.com)

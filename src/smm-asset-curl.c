@@ -70,14 +70,18 @@ smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const c
 	CURL *curl;
 	struct smm_curl_res_s *res = NULL;
 
+	DEBUG ("(%p, %s, %s, %p)\n", (void *) conn, path, post_data, write_data);
+
 	if (conn == NULL || path == NULL)
 	{
+		DEBUG ("conn or path is NULL\n");
 		return NULL;
 	}
 
 	curl = conn->curl;
 	if (curl == NULL)
 	{
+		DEBUG ("creating curl object\n");
 		curl = curl_easy_init ();
 		conn->curl = curl;
 	}
@@ -87,6 +91,7 @@ smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const c
 	if (asprintf (&res->full_uri, "%s%s", conn->host, path) < 0)
 	{
 		free (res);
+		DEBUG ("failed to allocate full_uri");
 		return NULL;
 	}
 
@@ -121,10 +126,13 @@ smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const c
 		curl_easy_setopt (curl, CURLOPT_WRITEDATA, NULL);
 	}
 
+	DEBUG ("fetching %s\n", res->full_uri);
 	CURLcode cres = curl_easy_perform (curl);
+	DEBUG ("curl returned %i\n", cres);
 	res->success = (cres == CURLE_OK);
 
 	curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &res->httpcode);
+	DEBUG ("httpcode = %li\n", res->httpcode);
 	switch (res->httpcode)
 	{
 		case 200:
@@ -156,6 +164,8 @@ smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const c
 	curl_easy_setopt (curl, CURLOPT_POST, 0);
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, NULL);
 	curl_easy_setopt (curl, CURLOPT_WRITEDATA, NULL);
+
+	DEBUG ("Done\n");
 
 	return res;
 }
@@ -258,7 +268,12 @@ smm_connection_login (smm_connection connection)
 	}
 	else if (!res_get)
 	{
+		DEBUG ("No res object returned\n");
 		connection->state = SMM_CONNECTION_NO_HOST_CONNECTION;
+	}
+	else
+	{
+		DEBUG ("success = %s, httpcode = %li\n", res_get->success ? "true" : "false", res_get->httpcode);
 	}
 	smm_curl_res_free (res_get);
 

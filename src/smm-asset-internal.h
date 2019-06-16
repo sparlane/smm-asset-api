@@ -28,6 +28,17 @@
 
 #include <curl/curl.h>
 
+extern bool smm_debug;
+#define DEBUG(...) do \
+	{ \
+		if (smm_debug) \
+		{ \
+			printf ("%s:%i ", __func__, __LINE__);\
+			printf(__VA_ARGS__); \
+		} \
+	} \
+	while (0)
+
 struct smm_connection_s {
 	char *host;
 	char *user;
