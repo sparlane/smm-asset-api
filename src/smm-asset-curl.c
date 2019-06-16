@@ -63,9 +63,9 @@ to_buffer (char *ptr, size_t size, size_t nmemb, void *userdata)
 	return new_bytes;
 }
 
-struct smm_curl_res_s *
-smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const char *post_data,
-				  size_t (*write_func) (char *ptr, size_t size, size_t nmemb, void *userdata), void *write_data)
+static struct smm_curl_res_s *
+_smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const char *post_data,
+				   size_t (*write_func) (char *ptr, size_t size, size_t nmemb, void *userdata), void *write_data)
 {
 	CURL *curl;
 	struct smm_curl_res_s *res = NULL;
@@ -279,6 +279,69 @@ smm_connection_login (smm_connection connection)
 
 	tidyBufFree (&docbuf);
 	tidyRelease (tdoc);
+
+	return res;
+}
+
+struct smm_curl_res_s *
+smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const char *post_data,
+				  size_t (*write_func) (char *ptr, size_t size, size_t nmemb, void *userdata), void *write_data)
+{
+	bool retry = true;
+	int retries = 0;
+	struct smm_curl_res_s *res = NULL;
+
+	while (retry && retries < 3 && (res = _smm_connection_curl_retrieve_url (conn, path, post_data, write_func, write_data)) != NULL)
+	{
+		retry = false;
+		retries++;
+		if (res->success && res->httpcode == 302 && res->redirect_url)
+		{
+			DEBUG ("Got redirected accessing %s\n", path);
+			/* It's possible we need to upgrade to https */
+			if (strncmp (conn->host, "https://", 8) != 0)
+			{
+				if (strncmp (res->redirect_url, "https://", 8) == 0)
+				{
+					/* Upgrade to https */
+					DEBUG ("Upgrading to https\n");
+					char *new_host = NULL;
+					if (strncmp (conn->host, "http://", 7) == 0)
+					{
+						if (asprintf (&new_host, "https://%s", &conn->host[7]) < 0)
+						{
+							DEBUG ("Failed to create new host\n");
+						}
+					}
+					else
+					{
+						if (asprintf (&new_host, "https://%s", conn->host) < 0)
+						{
+							DEBUG ("Failed to create new host\n");
+						}
+					}
+					if (new_host)
+					{
+						free (conn->host);
+						conn->host = new_host;
+						retry = true;
+					}
+				}
+			}
+			else if (strstr (res->redirect_url, "accounts/login") != NULL)
+			{
+				DEBUG ("Login required\n");
+				if (smm_connection_login (conn))
+				{
+					retry = true;
+				}
+			}
+			else
+			{
+				DEBUG ("Redirected to %s\n", res->redirect_url);
+			}
+		}
+	}
 
 	return res;
 }

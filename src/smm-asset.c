@@ -105,18 +105,8 @@ smm_asset_get_assets (smm_connection connection, smm_assets * assets, size_t * a
 	}
 	if (!(res->success && res->httpcode == 200))
 	{
-		/* Login and then try again */
-		if (smm_connection_login (connection))
-		{
-			smm_curl_res_free (res);
-			res = smm_connection_curl_retrieve_url (connection, "/assets/mine/json/", NULL, to_buffer, &buf);
-			if (!res || !(res->success && res->httpcode == 200))
-			{
-				/* Still no good */
-				smm_curl_res_free (res);
-				return false;
-			}
-		}
+		smm_curl_res_free (res);
+		return false;
 	}
 	smm_curl_res_free (res);
 
@@ -344,16 +334,9 @@ smm_asset_report_position (smm_asset asset, double latitude, double longitude, u
 	}
 	if (!(res->success && res->httpcode == 200))
 	{
-		/* login and try again */
 		smm_curl_res_free (res);
-		smm_connection_login (asset->conn);
-		res = smm_connection_curl_retrieve_url (asset->conn, page, NULL, to_buffer, &buf);
-		if (!res || !(res->success && res->httpcode == 200))
-		{
-			smm_curl_res_free (res);
-			free (page);
-			return false;
-		}
+		free (page);
+		return false;
 	}
 
 	free (page);
@@ -455,13 +438,7 @@ smm_search_get_waypoints (smm_search search, smm_waypoints * waypoints, size_t *
 	{
 		/* Login, try again */
 		smm_curl_res_free (res);
-		smm_connection_login (search->asset->conn);
-		res = smm_connection_curl_retrieve_url (search->asset->conn, search->url, NULL, to_buffer, &buf);
-		if (res == NULL || !(res->success && res->httpcode == 200))
-		{
-			smm_curl_res_free (res);
-			return false;
-		}
+		return false;
 	}
 
 	smm_curl_res_free (res);
@@ -566,15 +543,8 @@ smm_search_action (smm_search search, const char *action)
 	}
 	else if (!(res->success && res->httpcode == 200))
 	{
-		/* Login, try again */
 		smm_curl_res_free (res);
-		smm_connection_login (search->asset->conn);
-		res = smm_connection_curl_retrieve_url (search->asset->conn, action_page, NULL, to_buffer, &buf);
-		if (res == NULL || !(res->success && res->httpcode == 200))
-		{
-			smm_curl_res_free (res);
-			return false;
-		}
+		return false;
 	}
 
 	smm_curl_res_free (res);
@@ -630,14 +600,8 @@ smm_asset_get_search (smm_asset asset, double latitude, double longitude)
 	{
 		/* login and try again */
 		smm_curl_res_free (res);
-		smm_connection_login (asset->conn);
-		res = smm_connection_curl_retrieve_url (asset->conn, page, NULL, to_buffer, &buf);
-		if (!res || !(res->success && res->httpcode == 200))
-		{
-			smm_curl_res_free (res);
-			free (page);
-			return false;
-		}
+		free (page);
+		return false;
 	}
 	free (page);
 
