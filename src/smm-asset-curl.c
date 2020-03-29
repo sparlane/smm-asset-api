@@ -19,14 +19,23 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+#include "config.h"
+
 #include "smm-asset.h"
 #include "smm-asset-internal.h"
 
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_TIDY_H
 #include <tidy.h>
 #include <tidybuffio.h>
+#elif HAVE_TIDY_TIDY_H
+#include <tidy/tidy.h>
+#include <tidy/tidybuffio.h>
+#else
+#error No tidy header(s)
+#endif
 
 void
 smm_curl_res_free (struct smm_curl_res_s *res)
