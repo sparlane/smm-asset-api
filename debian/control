@@ -1,0 +1,15 @@
+Source: libsmm-asset
+Section: unknown
+Priority: optional
+Maintainer: <sjp@canterburyairpatrol.org>
+Build-Depends: debhelper (>= 10), autotools-dev, pkg-config, libtidy-dev, libcurl-dev, libjansson-dev
+Standards-Version: 4.1.4
+Homepage: https://github.com/canterbury-air-patrol/smm-asset-api
+
+Package: libsmm-asset
+Section: libs
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Asset Library for Search Management Map
