@@ -5,7 +5,7 @@ DISTRIBUTION = $(shell sed -n "s/^VERSION_CODENAME=//p" /etc/os-release)
 	dh $@ --with autoreconf 
 
 override_dh_auto_configure:
-	if [ "$(DISTRIBUTION)" = "bionic" ]; \
+	if [ "$(DISTRIBUTION)" = "bionic" ] || [ "$(DISTRIBUTION)" = "stretch" ]; \
 	then \
 		dh_auto_configure -- TIDY_LIBS=-ltidy TIDY_CFLAGS=-I/usr/include ; \
 	else \
