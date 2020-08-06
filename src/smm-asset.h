@@ -83,6 +83,8 @@ typedef enum
 	SMM_COMMAND_RTL,	/*!< Return to launch site */
 	SMM_COMMAND_GOTO,	/*!< Goto to the specified position */
 	SMM_COMMAND_CONTINUE,	/*!< Previous command revoked, resume own navigation */
+	SMM_COMMAND_ABANDON_SEARCH, /*!< Abandon the current search, expect reassignment */
+	SMM_COMMAND_MISSION_COMPLETE, /*!< The mission has concluded, return to base */
 	SMM_COMMAND_UNKNOWN,	/*!< The command from the server is not known */
 } smm_asset_command;
 

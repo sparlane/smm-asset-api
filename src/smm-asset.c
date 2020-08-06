@@ -273,6 +273,14 @@ smm_asset_update_command (smm_asset asset, struct buffer_s *buf)
 		{
 			asset->last_command = SMM_COMMAND_CIRCLE;
 		}
+		else if (strcmp (command, "AS") == 0)
+		{
+			asset->last_command = SMM_COMMAND_ABANDON_SEARCH;
+		}
+		else if (strcmp (command, "MC") == 0)
+		{
+			asset->last_command = SMM_COMMAND_MISSION_COMPLETE;
+		}
 		else
 		{
 			asset->last_command = SMM_COMMAND_UNKNOWN;
