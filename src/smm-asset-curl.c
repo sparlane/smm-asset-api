@@ -45,6 +45,7 @@ smm_curl_res_free (struct smm_curl_res_s *res)
 		free (res->full_uri);
 		free (res->redirect_url);
 		free (res->content_type);
+		free (res);
 	}
 }
 
@@ -298,15 +299,15 @@ smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const c
 {
 	bool retry = true;
 	int retries = 0;
-	struct smm_curl_res_s *res = NULL;
+	struct smm_curl_res_s *res = _smm_connection_curl_retrieve_url (conn, path, post_data, write_func, write_data);
 
-	while (retry && retries < 3 && (res = _smm_connection_curl_retrieve_url (conn, path, post_data, write_func, write_data)) != NULL)
+	while (retry && retries < 3 && res != NULL)
 	{
 		retry = false;
 		retries++;
 		if (res->success && res->httpcode == 302 && res->redirect_url)
 		{
-			DEBUG ("Got redirected accessing %s\n", path);
+			DEBUG ("Got redirected to (%s) accessing %s\n", res->redirect_url, path);
 			/* It's possible we need to upgrade to https */
 			if (strncmp (conn->host, "https://", 8) != 0)
 			{
@@ -349,6 +350,11 @@ smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const c
 			{
 				DEBUG ("Redirected to %s\n", res->redirect_url);
 			}
+		}
+		if (retry && retries < 3)
+		{
+			smm_curl_res_free (res);
+			res = _smm_connection_curl_retrieve_url (conn, path, post_data, write_func, write_data);
 		}
 	}
 
