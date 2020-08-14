@@ -204,7 +204,7 @@ bool smm_asset_last_goto_pos (smm_asset asset, double *lat, double *lon);
  * @param latitude the current latitude of the asset in degrees
  * @param longitude the current longitude of the asset in degrees
  *
- * @return the closest search for this asset type, it will need to be accepted with @ref smm_search_accept before searching begins
+ * @return the closest or next queued search for this asset type, it will need to be accepted with @ref smm_search_accept before searching begins
  */
 smm_search smm_asset_get_search (smm_asset asset, double latitude, double longitude);
 
@@ -226,6 +226,15 @@ uint64_t smm_search_distance (smm_search search);
  * @return the total length of the search in meters, 0 on error
  */
 uint64_t smm_search_length (smm_search search);
+
+/**
+ * Get the sweep width
+ *
+ * @param search the search
+ *
+ * @return the sweep width of the search in meters, 0 on error
+ */
+uint64_t smm_search_sweep_width (smm_search search);
 
 /**
  * Get all the waypoints associated with a a search

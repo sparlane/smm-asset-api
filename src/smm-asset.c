@@ -372,13 +372,14 @@ smm_asset_report_position (smm_asset asset, double latitude, double longitude, u
 }
 
 static smm_search
-smm_search_create (smm_asset asset, const char *url, uint64_t length, uint64_t distance)
+smm_search_create (smm_asset asset, const char *url, uint64_t length, uint64_t distance, uint64_t sweep_width)
 {
 	smm_search search = calloc (1, sizeof (struct smm_search_s));
 	search->asset = asset;
 	search->url = strdup (url);
 	search->length = length;
 	search->distance = distance;
+	search->sweep_width = sweep_width;
 
 	return search;
 }
@@ -399,6 +400,16 @@ smm_search_length (smm_search search)
 	if (search)
 	{
 		return search->length;
+	}
+	return 0;
+}
+
+uint64_t
+smm_search_sweep_width(smm_search search)
+{
+	if (search)
+	{
+		return search->sweep_width;
 	}
 	return 0;
 }
@@ -531,7 +542,7 @@ smm_search_action (smm_search search, const char *action)
 		if (json_str)
 		{
 			*json_str = '\0';
-			if (asprintf (&action_page, "/%s/%s/?asset_id=%i", tmp, action, smm_asset_get_asset_id (search->asset)) < 0)
+			if (asprintf (&action_page, "%s/%s/?asset_id=%i", tmp, action, smm_asset_get_asset_id (search->asset)) < 0)
 			{
 				free (tmp);
 				return false;
@@ -624,6 +635,7 @@ smm_asset_get_search (smm_asset asset, double latitude, double longitude)
 			const char *url = NULL;
 			uint64_t distance = 0;
 			uint64_t length = 0;
+			uint64_t sweep_width = 0;
 			json_t *tmp = json_object_get (json_root, "object_url");
 			if (tmp)
 			{
@@ -639,7 +651,12 @@ smm_asset_get_search (smm_asset asset, double latitude, double longitude)
 			{
 				length = json_integer_value (tmp);
 			}
-			search = smm_search_create (asset, url, length, distance);
+			tmp = json_object_get (json_root, "sweep_width");
+			if (tmp)
+			{
+				sweep_width = json_integer_value (tmp);
+			}
+			search = smm_search_create (asset, url, length, distance, sweep_width);
 			json_decref (json_root);
 		}
 	}
