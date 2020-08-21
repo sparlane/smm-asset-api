@@ -24,6 +24,7 @@
 
 #include "smm-asset.h"
 
+#include <pthread.h>
 #include <stdbool.h>
 
 #include <curl/curl.h>
@@ -47,6 +48,7 @@ struct smm_connection_s
 	smm_connection_status state;
 	CURL *curl;
 	char *csrfmiddlewaretoken;
+	pthread_mutex_t lock;
 };
 
 struct smm_asset_s

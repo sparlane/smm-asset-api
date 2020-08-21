@@ -23,6 +23,7 @@
 #include "smm-asset.h"
 #include "smm-asset-internal.h"
 
+#include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -48,6 +49,7 @@ smm_asset_connect (const char *host, const char *user, const char *pass)
 	conn->host = strdup (host);
 	conn->user = strdup (user);
 	conn->pass = strdup (pass);
+	pthread_mutex_init (&conn->lock, NULL);
 
 	smm_connection_login (conn);
 
@@ -74,6 +76,7 @@ smm_connection_close (smm_connection connection)
 		free (connection->pass);
 		free (connection->csrfmiddlewaretoken);
 		curl_easy_cleanup (connection->curl);
+		pthread_mutex_destroy(&connection->lock);
 	}
 	free (connection);
 }

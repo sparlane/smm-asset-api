@@ -24,6 +24,7 @@
 #include "smm-asset.h"
 #include "smm-asset-internal.h"
 
+#include <pthread.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -88,6 +89,7 @@ _smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const 
 		return NULL;
 	}
 
+	pthread_mutex_lock (&conn->lock);
 	curl = conn->curl;
 	if (curl == NULL)
 	{
@@ -102,6 +104,7 @@ _smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const 
 	{
 		free (res);
 		DEBUG ("failed to allocate full_uri");
+		pthread_mutex_unlock (&conn->lock);
 		return NULL;
 	}
 
@@ -174,6 +177,8 @@ _smm_connection_curl_retrieve_url (smm_connection conn, const char *path, const 
 	curl_easy_setopt (curl, CURLOPT_POST, 0);
 	curl_easy_setopt (curl, CURLOPT_WRITEFUNCTION, NULL);
 	curl_easy_setopt (curl, CURLOPT_WRITEDATA, NULL);
+
+	pthread_mutex_unlock(&conn->lock);
 
 	DEBUG ("Done\n");
 
