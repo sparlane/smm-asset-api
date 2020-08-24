@@ -371,7 +371,9 @@ smm_asset_report_position (smm_asset asset, double latitude, double longitude, u
 
 	free (buf.data);
 
-	return false;
+	smm_curl_res_free (res);
+
+	return true;
 }
 
 static smm_search
