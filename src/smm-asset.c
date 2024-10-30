@@ -109,6 +109,7 @@ smm_asset_get_assets (smm_connection connection, smm_assets * assets, size_t * a
 	{
 		return false;
 	}
+	fprintf (stderr, "Getting /assets/ result code: %lu\ndata (%lu bytes):\n%s\n\n", res->httpcode, buf.bytes, buf.data);
 	if (!(res->success && res->httpcode == HTTP_SUCCESS))
 	{
 		smm_curl_res_free (res);
